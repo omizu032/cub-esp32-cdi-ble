@@ -48,6 +48,30 @@
 
 1. Arduino IDE などで `cub-esp32-cdi-ble.ino` をESP32-S3 に書き込みます。
 
-### Web UI (セッティングアプリ) の起動
+### Web UI開発環境の構築
 
-後日公開予定
+1. コマンドプロンプト（Windows）またはターミナル（Mac, Linux）を開き、任意の作業用フォルダで以下のコマンドを実行して、Vueプロジェクトを作成します。
+   (事前にNode.jsがインストールされている必要があります)
+
+```bash
+npm create vite@latest cdi-app -- --template vue
+```
+
+2. 作成された `cdi-app` フォルダに移動し、必要な基本パッケージをインストールします。
+
+```bash
+cd cdi-app
+npm install
+```
+
+3. プロジェクトフォルダ内の `src/App.vue` を置き換えます。
+4. ローカル開発サーバーの起動
+  以下のコマンドを実行して、開発用サーバーを立ち上げます。
+
+```bash
+npm run dev
+```
+
+5. ブラウザでの通信テスト
+   Web Bluetooth APIはセキュリティの都合上、ブラウザに制限があります。必ず Google Chrome または Microsoft Edge を使用して、表示されたローカルURL (http://localhost:5173/) にアクセスします
+   画面上の 「Connect to ESP32」 ボタンをクリックすると、ブラウザのポップアップ画面に「CDI-ESP32-S3」というデバイスが表示されるので、選択して「ペア設定」を押します。接続が成功すると、画面上のステータスが切り替わります。このとき、ESP32側のシリアルモニタにも BLE App Connected! と表示されるか確認してください。
