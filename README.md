@@ -78,11 +78,31 @@ npm run dev
 
 ### Web サーバ上での稼働
 
-1. プロジェクトフォルダで以下のコマンドを実行します。コマンドが完了すると、プロジェクトフォルダの中に `dist` という名前の新しいフォルダが作成されます。
+プロジェクトフォルダで以下のコマンドを実行します。コマンドが完了すると、プロジェクトフォルダの中に `dist` という名前の新しいフォルダが作成されます。
 
 ```bash
 npm run build
 ```
 
-2. `dist` フォルダ内の `index.html` を含むすべてのファイル・フォルダをWebサーバ上へUPする。
-3. Webサーバ側で2.の `index.html` にアクセスできるように設定する。
+`dist` フォルダ内の `index.html` を含むすべてのファイル・フォルダをWebサーバ上へUPして公開することで利用可能になります。
+
+例えばDockerで公開する場合の手順は以下の通り。
+
+1. **ビルドの実行:**
+PCのプロジェクトディレクトリで `npm run build` を実行し、`dist` フォルダを生成します。
+2. **静的配信用コンテナの立ち上げ (HTTP):**
+軽量なNginxコンテナ（`nginx:alpine` など）を立ち上げ、生成された `dist` フォルダをNginxの公開ディレクトリ（`/usr/share/nginx/html`）にマウントします。このコンテナはHTTP（80番ポートなど）で待ち受けます。 `docker-compose.yml`の例を下記に記します。
+
+```docker-compose
+services:
+  cdi-dashboard:
+    image: nginx:alpine
+    container_name: cdi-dashboard
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    volumes:
+      - ./dist:/usr/share/nginx/html:ro
+```
+
+必要に応じてリバースプロキシを設定してHTTPSからのアクセスを可能にしてください。
