@@ -26,7 +26,7 @@
   - 2Dマップエディタ: 画面上のグラフを指でドラッグ＆ドロップして、直感的に点火カーブを作成可能。
 
 
-## 1. ハードウェア構成
+## ハードウェア構成
 
 詳細は[こちらの記事](https://zenn.dev/omizu032/articles/53a9f0207f47e5)を参照してください。
 
@@ -37,114 +37,29 @@
 - **3.3V LDO:** AZ1117CH-3.3TRG1 (or 1117 compatible)
 - **PCB Design:** スプリットGND構造 ＋ ビア・スティッチングによるシールド強化
 
-## 2. ソフトウェア技術スタック (Software Stack)
+## ソフトウェア技術スタック (Software Stack)
+
+詳細は
+[https://zenn.dev/omizu032/articles/53a9f0207f47e5](https://zenn.dev/omizu032/articles/53a9f0207f47e5)
+[https://zenn.dev/omizu032/articles/1b46f5b41951fd](https://zenn.dev/omizu032/articles/1b46f5b41951fd)
+を参照してください。
 
 - **デバイス側 (Firmware):** C/C++ (ESP-IDF / Arduino core for ESP32), FreeRTOS
 - **クライアント側 (Web UI):** Vite, Vue 3, Web Bluetooth API
 
-## 3. 使い方 (Getting Started)
+## 使用方法
 
-### 3-1. ファームウェアの書き込み
+1. CDIにスケッチを転送します
+2. 設定アプリにアクセスできるように設定します
+3. バイクのイグニッションをONにし、ESP32を起動します。
+4. ブラウザで本アプリ(HTTPS化されたURL)を開きます。
+5. `Connect to ESP32` ボタンをタップし、デバイスリストから `CDI-ESP32-S3` 等を選択してペアリングします。
+6. プルダウンメニューから各機能（Telemetry, Editor, Profile, Configuration）を切り替えて操作します。
 
-1. Arduino IDE などで `cub-esp32-cdi-ble.ino` をESP32-S3 に書き込みます。
+## ファームウェアの書き込み
 
-### 3-2. Web UI開発環境の構築
+Arduino IDE などで `cub-esp32-cdi-ble.ino` をESP32-S3 に書き込みます。
 
+## 設定アプリの設定
 
-#### 3-2-1. 開発環境の前提条件 (Prerequisites)
-
-開発を行うPCには以下のインストールが必要です。
-
-- **Node.js**: v18.0以上推奨 (LTSバージョン)
-- **npm**: Node.jsに付属
-
-#### 3-2-2. プロジェクトの初期化 (Initialization)
-
-※すでにプロジェクトが存在する場合は不要です。ゼロから作り直す場合の手順です。
-
-```bash
-# Viteを使ってVue 3プロジェクトを生成
-npm create vite@latest cdi-app -- --template vue
-```
-
-Viteサーバが起動することを確認する
-
-#### 3-2-3. アプリファイルの上書き
-
-プロジェクトフォルダ内の `src/App.vue` を置き換えます。
-HMR（Hot Module Replacement）により、コードを保存した瞬間にブラウザの画面が更新されます。
-
-開発サーバをCtrl+Cで停止した場合は
-
-```bash
-npm run dev
-```
-
-で再起動できます
-
-- **アクセスURL:** `http://localhost:5173`
-- **⚠️ Web Bluetoothの注意点:**
-開発環境（`http://192.168.x.x` など）にスマホからアクセスしても、HTTPS環境ではないため Web Bluetooth API はブラウザにブロックされて起動しません。スマホで開発中の動作を見る場合は、PCとUSB接続して Chromeの「Port Forwarding（`chrome://inspect/#devices`）」を使用し、スマホ上の `http://localhost:5173` にルーティングさせる必要があります。
-
-#### 3-3-4. ブラウザでの通信テスト
-
-画面上の 「Connect to ESP32」 ボタンをクリックすると、ブラウザのポップアップ画面に「CDI-ESP32-S3」というデバイスが表示されるので、選択して「ペア設定」を押します。
-接続が成功すると、画面上のステータスが切り替わります。このとき、ESP32側のシリアルモニタにも BLE App Connected! と表示されるか確認してください。
-
-### 3-3. Web サーバ上での稼働
-
-#### 3-3-1. 本番用のビルド
-
-開発環境で確認出来たら、Webサーバ上へデプロイするためのファイル群を生成します
-
-```bash
-npm run build
-```
-
-#### 3-3-2. Webサーバへのデプロイ
-
-本プロジェクトは静的ファイルのみで構成されているため、軽量なNginxコンテナ等を用いて配信するのが最適です。
-
-- **サーバー側のディレクトリ構成**
-
-```text
-/your-server-dir/
- ├─ docker-compose.yml
- └─ dist/               <-- 開発PCでビルドしたdistフォルダをそのまま配置
-     ├─ index.html
-     └─ assets/
-```
-
-- **`docker-compose.yml` の設定例**
-
-Nginxの公式軽量イメージを使用し、ホスト側の `dist` フォルダをコンテナ内のドキュメントルートに読み取り専用（`ro`）でマウントします。
-
-```yaml
-
-services:
-  cdi-dashboard:
-    image: nginx:alpine
-    container_name: cdi-dashboard
-    restart: unless-stopped
-    ports:
-      # ホストマシンのポート : コンテナのポート(80)
-      - "8080:80"
-    volumes:
-      - ./dist:/usr/share/nginx/html:ro
-
-```
-
-- **コンテナの起動とSSL化**
-
-1. サーバー上で `docker-compose up -d` を実行し、HTTPコンテナを立ち上げます。
-2. リバースプロキシ（Nginx Proxy ManagerやTraefikなど）を設定し、取得済みのLet's Encrypt SSL証明書（`https://cdi.yourdomain.com`）へのアクセスを、上記コンテナの `8080` ポートへルーティングします。
-3. これにより、スマホからHTTPS経由でセキュアにアクセス可能となり、Web Bluetooth APIが正常に動作します。
-
-#### 3-3-3. 今後のアップデート方法
-
-アプリのUI改修や機能追加を行った場合のデプロイフローは非常にシンプルです。
-
-1. 開発PCでコードを修正し、`npm run build` を実行。
-2. 生成された新しい `dist` フォルダを、サーバー側の古い `dist` フォルダに上書き転送（置換）するだけ。
-3. （Dockerコンテナの再起動は不要です。スマホでブラウザをリロードすれば最新版になります）。
-
+`./cdi-app`を参考に設定アプリの設定をしてください
