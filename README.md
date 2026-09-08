@@ -1,6 +1,6 @@
 # ホンダ スーパーカブ用 ESP32-S3 BLE デジタルCDI
 
-ホンダ スーパーカブ90（HA02等）の横型エンジン向けに最適化された、ESP32-S3開発ボードをベースにしたプログラマブル・デジタル進角/遅角CDIのファームウェアです。
+ESP32-S3開発ボードをベースにしたホンダ スーパーカブ90（HA02等）用のプログラマブル・デジタル進角/遅角CDIのファームウェアです。
 
 設定アプリとしてWeb Bluetooth APIとVite+Vue3を利用したPWA（Progressive Web App）により、アプリのインストール不要で、スマートフォンから安全かつ完全にワイヤレスで点火マップのセッティングとテレメトリ監視が可能です。
 
@@ -25,40 +25,26 @@
   - リアルタイム・テレメトリ: RPM、現在の進角、キルスイッチのステータスをダッシュボードにリアルタイム表示。
   - 2Dマップエディタ: 画面上のグラフを指でドラッグ＆ドロップして、直感的に点火カーブを作成可能。
 
-
 ## ハードウェア構成
 
 詳細は[こちらの記事](https://zenn.dev/omizu032/articles/53a9f0207f47e5)を参照してください。
 
-- **MCU:** ESP32-S3
-- **Thyristor (SCR):** TYN625RG (高感度ゲート駆動対応)
-- **Optocoupler:** LTV-817S-TA1-C (SMD)
-- **Gate Control:** 2N7002 (N-ch MOSFET)
-- **3.3V LDO:** AZ1117CH-3.3TRG1 (or 1117 compatible)
-- **PCB Design:** スプリットGND構造 ＋ ビア・スティッチングによるシールド強化
-
-## ソフトウェア技術スタック (Software Stack)
+## ソフトウェア技術スタック
 
 詳細は
 [https://zenn.dev/omizu032/articles/53a9f0207f47e5](https://zenn.dev/omizu032/articles/53a9f0207f47e5)
+
 [https://zenn.dev/omizu032/articles/1b46f5b41951fd](https://zenn.dev/omizu032/articles/1b46f5b41951fd)
 を参照してください。
 
-- **デバイス側 (Firmware):** C/C++ (ESP-IDF / Arduino core for ESP32), FreeRTOS
-- **クライアント側 (Web UI):** Vite, Vue 3, Web Bluetooth API
-
 ## 使用方法
 
-1. CDIにスケッチを転送します
-2. 設定アプリにアクセスできるように設定します
+1. Arduino IDEなどでCDI(ESP32-S3)にスケッチ `cub-esp32-cdi-ble.ino` を転送します
+2. 設定アプリにアクセスできるようにWebサーバの設定します
 3. バイクのイグニッションをONにし、ESP32を起動します。
 4. ブラウザで本アプリ(HTTPS化されたURL)を開きます。
 5. `Connect to ESP32` ボタンをタップし、デバイスリストから `CDI-ESP32-S3` 等を選択してペアリングします。
 6. プルダウンメニューから各機能（Telemetry, Editor, Profile, Configuration）を切り替えて操作します。
-
-## ファームウェアの書き込み
-
-Arduino IDE などで `cub-esp32-cdi-ble.ino` をESP32-S3 に書き込みます。
 
 ## 設定アプリの設定
 
